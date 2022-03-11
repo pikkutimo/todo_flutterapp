@@ -4,4 +4,4 @@ An flutter application accessing the todo_server from the mobile device.
 
 ## Flow
 
-![Flow](https://https://github.com/pikkutimo/todo_flutterapp/media/Flutter_todo_flow.svg "Flow")
+![Flow](https://https://github.com/pikkutimo/todo_flutterapp/media/Flutter_todo_flow.png "Flow")
