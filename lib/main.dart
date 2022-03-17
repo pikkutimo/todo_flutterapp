@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
+// import 'package:jwt_decode/jwt_decode.dart';
 
-const SERVER_IP = 'https://rocky-harbor-47876.herokuapp.com/api/';
+const SERVER_IP = 'https://rocky-harbor-47876.herokuapp.com/api';
 final storage = FlutterSecureStorage();
 
 void main() {
@@ -60,9 +61,10 @@ class LoginPage extends StatelessWidget {
                     if (jwt != null) {
                       storage.write(key: "jwt", value: jwt);
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => HomePage.fromBase64(jwt)));
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const TodoPage()),
+                      );
                     } else {
                       displayDialog(context, "An Error Occurred",
                           "No account was found matching that username and password");
@@ -85,11 +87,6 @@ class LoginPage extends StatelessWidget {
                       if (res == 201) {
                         displayDialog(context, "Success",
                             "The user was created. Log in now.");
-                      } else if (res == 409) {
-                        displayDialog(
-                            context,
-                            "That username is already registered",
-                            "Please try to sign up using another username or log in if you already have an account.");
                       } else {
                         displayDialog(
                             context, "Error", "An unknown error occurred.");
@@ -103,40 +100,35 @@ class LoginPage extends StatelessWidget {
   }
 }
 
-class HomePage extends StatelessWidget {
-  const HomePage(this.jwt, this.payload, {Key? key}) : super(key: key);
-
-  factory HomePage.fromBase64(String jwt) =>
-    HomePage(
-      jwt,
-      json.decode(
-        ascii.decode(
-          base64.decode(base64.normalize(jwt.split(".")[1]))
-        )
-      )
-    );
-
-  final String jwt;
-  final Map<String, dynamic> payload;
+class TodoPage extends StatelessWidget {
+  const TodoPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) =>
-  Scaffold(
-    appBar: AppBar(title: const Text("Secret Data Screen")),
-    body: Center(
-      child: FutureBuilder(
-        future: http.read(Uri.parse('$SERVER_IP/users'), headers: {"Authorization": jwt}),
-        builder: (context, snapshot) =>
-          snapshot.hasData ?
-          Column(
-            children: <Widget>[
-              Text("${payload['username']}, here's the data:"),
-              Text(snapshot.data, style: Theme.of(context).textTheme.display1)
-            ],
-          )
-          :
-          snapshot.hasError ? Text("An error occurred") : CircularProgressIndicator()
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Second Route'),
       ),
-    ),
-  );
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('Go back!'),
+        ),
+      ),
+    );
+  }
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        title: 'Flutter todo',
+        theme: ThemeData(primarySwatch: Colors.blue),
+        home: LoginPage());
+  }
 }
