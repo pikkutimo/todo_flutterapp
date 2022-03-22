@@ -1,17 +1,21 @@
+// ignore_for_file: no_logic_in_create_state
+
+// import 'dart:collection';
+import 'dart:convert';
+// import 'dart:html';
+// import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'dart:convert';
-// import 'package:jwt_decode/jwt_decode.dart';
 
-const SERVER_IP = 'https://rocky-harbor-47876.herokuapp.com/api';
-final storage = FlutterSecureStorage();
+const serverIp = 'https://rocky-harbor-47876.herokuapp.com/api';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class LoginPage extends StatelessWidget {
+  LoginPage({Key? key}) : super(key: key);
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -21,15 +25,18 @@ class LoginPage extends StatelessWidget {
             AlertDialog(title: Text(title), content: Text(text)),
       );
 
-  Future<String?> attemptLogIn(String username, String password) async {
-    var res = await http.post(Uri.parse('$SERVER_IP/login'),
+  Future<User> attemptLogIn(String username, String password) async {
+    final response = await http.post(Uri.parse('$serverIp/login'),
         body: {"username": username, "password": password});
-    if (res.statusCode == 200) return res.body;
-    return null;
+    if (response.statusCode == 200) {
+      return User.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to login');
+    }
   }
 
   Future<int> attemptSignUp(String username, String password) async {
-    var res = await http.post(Uri.parse('$SERVER_IP/users'),
+    var res = await http.post(Uri.parse('$serverIp/users'),
         body: {"username": username, "password": password});
     return res.statusCode;
   }
@@ -57,15 +64,16 @@ class LoginPage extends StatelessWidget {
                   onPressed: () async {
                     var username = _usernameController.text;
                     var password = _passwordController.text;
-                    var jwt = await attemptLogIn(username, password);
-                    if (jwt != null) {
-                      storage.write(key: "jwt", value: jwt);
+
+                    try {
+                      var user = await attemptLogIn(username, password);
+                      // storage.write(key: "username", value: user.username);
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const TodoPage()),
+                            builder: (context) => TodoPage(user: user)),
                       );
-                    } else {
+                    } catch (exception) {
                       displayDialog(context, "An Error Occurred",
                           "No account was found matching that username and password");
                     }
@@ -101,21 +109,15 @@ class LoginPage extends StatelessWidget {
 }
 
 class TodoPage extends StatelessWidget {
-  const TodoPage({Key? key}) : super(key: key);
+  const TodoPage({Key? key, required this.user}) : super(key: key);
+
+  final User user;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Second Route'),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text('Go back!'),
-        ),
+        title: Text(user.username),
       ),
     );
   }
@@ -132,3 +134,59 @@ class MyApp extends StatelessWidget {
         home: LoginPage());
   }
 }
+
+class User {
+  final String token;
+  final String username;
+  final String name;
+
+  const User({
+    required this.token,
+    required this.username,
+    required this.name,
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      token: json['token'],
+      username: json['username'],
+      name: json['name'],
+    );
+  }
+}
+
+// class Todo {
+//   final String content;
+//   final bool important;
+//   final bool done;
+
+//   const Todo({
+//     required this.content,
+//     required this.important,
+//     required this.done,
+//   });
+
+//   factory Todo.fromJson(Map<String, dynamic> json) {
+//     return Todo(
+//       content: json['content'] as String,
+//       important: json['important'] as bool,
+//       done: json['done'] as bool,
+//     );
+//   }
+// }
+
+// class TodosModel extends ChangeNotifier {
+//   final List<Todo> _todos = [];
+
+//   UnmodifiableListView<Todo> get todos => UnmodifiableListView(_todos);
+
+//   void add(Todo todo) {
+//     _todos.add(todo);
+//     notifyListeners();
+//   }
+
+//   void remove(String content) {
+//     _todos.removeWhere((todo) => todo.content == content);
+//     notifyListeners();
+//   }
+// }
