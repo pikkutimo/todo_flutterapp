@@ -1,31 +1,12 @@
-import 'dart:io';
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:todo_flutterapp/todos_service.dart';
 import 'user_model.dart';
-// import 'todos_service.dart';
+import 'todos_service.dart';
 import 'todos_model.dart';
 import 'dart:async';
 
-Future<List<Todo>> fetchTodos(String token) async {
-  final response = await http.get(
-    Uri.parse('https://rocky-harbor-47876.herokuapp.com/api/todos'),
-    headers: {
-      HttpHeaders.authorizationHeader: 'bearer $token',
-    },
-  );
-
-  if (response.statusCode == 200) {
-    final parsed = json.decode(response.body).cast<Map<String, dynamic>>();
-
-    return parsed.map<Todo>((json) => Todo.fromMap(json)).toList();
-  } else {
-    throw Exception('Failed to load todos');
-  }
-}
-
 class TodoPage extends StatefulWidget {
-  TodoPage({Key? key, required this.user}) : super(key: key);
+  const TodoPage({Key? key, required this.user}) : super(key: key);
 
   final User user;
 
@@ -35,11 +16,14 @@ class TodoPage extends StatefulWidget {
 
 class _TodoPageState extends State<TodoPage> {
   late Future<List<Todo>> futureTodo;
+  String userName = "";
+  final TodosService _todosService = TodosService();
 
   @override
   void initState() {
     super.initState();
-    futureTodo = fetchTodos(widget.user.token);
+    futureTodo = _todosService.fetchTodos(widget.user.token);
+    userName = widget.user.username;
   }
 
   @override
@@ -51,7 +35,23 @@ class _TodoPageState extends State<TodoPage> {
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Fetch Data Example'),
+          title: Text('User: $userName'),
+          actions: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(right: 20.0),
+              child: GestureDetector(
+                onTap: () {
+                  // When logging off, you return back and all todos will be
+                  // loaded again when logging in
+                  Navigator.pop(context);
+                },
+                child: const Icon(
+                  Icons.logout,
+                  size: 26.0,
+                ),
+              ),
+            )
+          ],
         ),
         body: FutureBuilder<List<Todo>>(
           future: futureTodo,
@@ -82,8 +82,8 @@ class _TodoPageState extends State<TodoPage> {
                       ButtonBar(
                         children: [
                           OutlinedButton(
-                              onPressed: () => print('edit'),
-                              child: Text('Edit')),
+                              onPressed: () => print(userName),
+                              child: const Text('Edit')),
                           OutlinedButton(
                               onPressed: () => print('importance'),
                               child: Text(snapshot.data![index].important
@@ -101,7 +101,7 @@ class _TodoPageState extends State<TodoPage> {
                 ),
               );
             } else {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             }
           },
         ),
@@ -109,31 +109,3 @@ class _TodoPageState extends State<TodoPage> {
     );
   }
 }
-
-// class TodoPage extends StatelessWidget {
-//   TodoPage({Key? key, required this.user}) : super(key: key);
-
-//   final User user;
-//   final todosService = TodosService();
-
-//   void _fetch() {
-//     todosService.getTodos(user.token);
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//         appBar: AppBar(
-//           title: Text(user.username),
-//         ),
-//         body: Padding(
-//             padding: const EdgeInsets.all(8.0),
-//             child: Column(children: <Widget>[
-//               TextButton(
-//                   onPressed: () async {
-//                     _fetch();
-//                   },
-//                   child: const Text("Fetch")),
-//             ])));
-//   }
-// }
