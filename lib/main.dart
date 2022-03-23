@@ -1,12 +1,8 @@
-// ignore_for_file: no_logic_in_create_state
-
-// import 'dart:collection';
 import 'dart:convert';
-// import 'dart:html';
-// import 'dart:io';
-
+import 'user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'todo_page.dart';
 
 const serverIp = 'https://rocky-harbor-47876.herokuapp.com/api';
 
@@ -108,20 +104,33 @@ class LoginPage extends StatelessWidget {
   }
 }
 
-class TodoPage extends StatelessWidget {
-  const TodoPage({Key? key, required this.user}) : super(key: key);
+// class TodoPage extends StatelessWidget {
+//   TodoPage({Key? key, required this.user}) : super(key: key);
 
-  final User user;
+//   final User user;
+//   final todosService = TodosService();
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(user.username),
-      ),
-    );
-  }
-}
+//   void _fetch() {
+//     todosService.getTodos(user.token);
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//         appBar: AppBar(
+//           title: Text(user.username),
+//         ),
+//         body: Padding(
+//             padding: const EdgeInsets.all(8.0),
+//             child: Column(children: <Widget>[
+//               TextButton(
+//                   onPressed: () async {
+//                     _fetch();
+//                   },
+//                   child: const Text("Fetch")),
+//             ])));
+//   }
+// }
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -135,25 +144,28 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class User {
-  final String token;
-  final String username;
-  final String name;
+// class User {
+//   final String token;
+//   final String username;
+//   final String name;
 
-  const User({
-    required this.token,
-    required this.username,
-    required this.name,
-  });
+//   const User({
+//     required this.token,
+//     required this.username,
+//     required this.name,
+//   });
 
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      token: json['token'],
-      username: json['username'],
-      name: json['name'],
-    );
-  }
-}
+//   factory User.fromJson(Map<String, dynamic> json) {
+//     return User(
+//       token: json['token'],
+//       username: json['username'],
+//       name: json['name'],
+//     );
+//   }
+// }
+
+// List<Todo> todosFromJson(String str) =>
+//   List<Todo>.from(json.decode(str).map((x) => Todo.fromMap(x)));
 
 // class Todo {
 //   final String content;
@@ -166,27 +178,26 @@ class User {
 //     required this.done,
 //   });
 
-//   factory Todo.fromJson(Map<String, dynamic> json) {
-//     return Todo(
+//   factory Todo.fromMap(Map<String, dynamic> json) => Todo(
 //       content: json['content'] as String,
 //       important: json['important'] as bool,
 //       done: json['done'] as bool,
-//     );
-//   }
+//   );
 // }
 
-// class TodosModel extends ChangeNotifier {
-//   final List<Todo> _todos = [];
+// Future<List<Todo> fetchTodos(String token) async {
+//   final response = await http.get(
+//       Uri.parse('https://rocky-harbor-47876.herokuapp.com/api/todos'),
+//       headers: {
+//         HttpHeaders.authorizationHeader: 'bearer $token',
+//       },
+//     );
 
-//   UnmodifiableListView<Todo> get todos => UnmodifiableListView(_todos);
+//   if(response.statusCode == 200) {
+//     final parsed = json.decode(response.body).cast<Map<String, dynamic>>();
 
-//   void add(Todo todo) {
-//     _todos.add(todo);
-//     notifyListeners();
-//   }
-
-//   void remove(String content) {
-//     _todos.removeWhere((todo) => todo.content == content);
-//     notifyListeners();
+//     return parsed.map<Todo>((json) => Todo.fromMap(json)).toList();
+//   } else {
+//     throw Exception('Failed to load todos');
 //   }
 // }
