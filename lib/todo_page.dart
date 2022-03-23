@@ -79,7 +79,23 @@ class _TodoPageState extends State<TodoPage> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      Text(snapshot.data![index].content),
+                      ButtonBar(
+                        children: [
+                          OutlinedButton(
+                              onPressed: () => print('edit'),
+                              child: Text('Edit')),
+                          OutlinedButton(
+                              onPressed: () => print('importance'),
+                              child: Text(snapshot.data![index].important
+                                  ? 'Important'
+                                  : 'Normal')),
+                          OutlinedButton(
+                              onPressed: () => print('done'),
+                              child: Text(snapshot.data![index].done
+                                  ? 'Done'
+                                  : 'Todo')),
+                        ],
+                      )
                     ],
                   ),
                 ),
