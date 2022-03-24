@@ -15,15 +15,53 @@ class TodoPage extends StatefulWidget {
 }
 
 class _TodoPageState extends State<TodoPage> {
-  late Future<List<Todo>> futureTodo;
+  late Future<List<Todo>> allTodos;
   String userName = "";
   final TodosService _todosService = TodosService();
 
   @override
   void initState() {
     super.initState();
-    futureTodo = _todosService.fetchTodos(widget.user.token);
+    allTodos = _todosService.fetchTodos(widget.user.token);
     userName = widget.user.username;
+  }
+
+  Future<Todo?> _showEditDialog(BuildContext context,
+      {required Todo todo}) async {
+    String content = todo.content;
+    bool important = todo.important;
+    bool done = todo.done;
+
+    return showDialog<Todo?>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Edit todo'),
+          content: TextField(
+            onChanged: (value) {
+              content = value;
+              print(content);
+            },
+            decoration: InputDecoration(hintText: content),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Todo editedTodo =
+                    Todo(content: content, important: important, done: done);
+                Navigator.pop(context, editedTodo);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -35,7 +73,7 @@ class _TodoPageState extends State<TodoPage> {
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text('User: $userName'),
+          title: Text('Welcome, $userName!'),
           actions: <Widget>[
             Padding(
               padding: const EdgeInsets.only(right: 20.0),
@@ -54,7 +92,7 @@ class _TodoPageState extends State<TodoPage> {
           ],
         ),
         body: FutureBuilder<List<Todo>>(
-          future: futureTodo,
+          future: allTodos,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               return ListView.builder(
@@ -82,7 +120,14 @@ class _TodoPageState extends State<TodoPage> {
                       ButtonBar(
                         children: [
                           OutlinedButton(
-                              onPressed: () => print(userName),
+                              onPressed: () async {
+                                final Todo? editedTodo = await _showEditDialog(
+                                    context,
+                                    todo: snapshot.data![index]);
+                                setState(() {
+                                  snapshot.data![index] = editedTodo!;
+                                });
+                              },
                               child: const Text('Edit')),
                           OutlinedButton(
                               onPressed: () => print('importance'),
