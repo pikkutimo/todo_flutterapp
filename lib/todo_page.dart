@@ -19,6 +19,8 @@ class _TodoPageState extends State<TodoPage> {
   String userName = "";
   final TodosService _todosService = TodosService();
 
+  get value => null;
+
   @override
   void initState() {
     super.initState();
@@ -29,15 +31,16 @@ class _TodoPageState extends State<TodoPage> {
   Future<Todo?> _showEditDialog(BuildContext context,
       {required Todo todo}) async {
     String content = todo.content;
-    bool important = todo.important;
-    bool done = todo.done;
+    bool isImportant = todo.important;
+    bool isDone = todo.done;
+    String todoId = todo.id;
 
     return showDialog<Todo?>(
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Edit todo'),
+          title: Text('Edit todo'),
           content: TextField(
             onChanged: (value) {
               content = value;
@@ -46,14 +49,21 @@ class _TodoPageState extends State<TodoPage> {
             decoration: InputDecoration(hintText: content),
           ),
           actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+            Row(
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+              ],
             ),
             TextButton(
               onPressed: () {
-                Todo editedTodo =
-                    Todo(content: content, important: important, done: done);
+                Todo editedTodo = Todo(
+                    content: content,
+                    important: isImportant,
+                    done: isDone,
+                    id: todoId);
                 Navigator.pop(context, editedTodo);
               },
               child: const Text('OK'),
