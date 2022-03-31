@@ -22,4 +22,10 @@ class Todo {
         done: json['done'] as bool,
         id: json['id'] as String,
       );
+
+  static Map<String, dynamic> toJson(Todo todo) => {
+        "content": todo.content,
+        "important": todo.important.toString(),
+        "done": todo.done.toString()
+      };
 }

@@ -20,4 +20,27 @@ class TodosService {
       throw Exception('Failed to load todos');
     }
   }
+
+  Future<void> editTodo(Todo editedTodo, String token) async {
+    final response = await http.put(
+      Uri.parse(
+          'https://rocky-harbor-47876.herokuapp.com/api/todos/${editedTodo.id}'),
+      headers: {
+        HttpHeaders.contentTypeHeader: "application/json",
+        HttpHeaders.authorizationHeader: 'bearer $token',
+      },
+      body: jsonEncode(Todo.toJson(editedTodo)),
+    );
+
+    if (response.statusCode == 200) {
+      // If the server did return a 200 OK response,
+      // then parse the JSON.
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+    } else {
+      // If the server did not return a 200 OK response,
+      // then throw an exception.
+      throw Exception('Failed to update todos.');
+    }
+  }
 }

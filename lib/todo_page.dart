@@ -17,19 +17,23 @@ class TodoPage extends StatefulWidget {
 class _TodoPageState extends State<TodoPage> {
   late Future<List<Todo>> allTodos;
   String userName = "";
-  final TodosService _todosService = TodosService();
+  String userToken = "";
+  final TodosService todosService = TodosService();
 
   get value => null;
 
   @override
   void initState() {
     super.initState();
-    allTodos = _todosService.fetchTodos(widget.user.token);
+    allTodos = todosService.fetchTodos(widget.user.token);
     userName = widget.user.username;
+    userToken = widget.user.token;
   }
 
   Future<Todo?> _showEditDialog(BuildContext context,
-      {required Todo todo}) async {
+      {required Todo todo,
+      required String token,
+      required TodosService todosService}) async {
     String content = todo.content;
     bool isImportant = todo.important;
     bool isDone = todo.done;
@@ -40,11 +44,11 @@ class _TodoPageState extends State<TodoPage> {
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Edit todo'),
+          title: const Text('Edit todo'),
           content: TextField(
             onChanged: (value) {
               content = value;
-              print(content);
+              // print(content);
             },
             decoration: InputDecoration(hintText: content),
           ),
@@ -64,6 +68,7 @@ class _TodoPageState extends State<TodoPage> {
                     important: isImportant,
                     done: isDone,
                     id: todoId);
+                todosService.editTodo(editedTodo, token);
                 Navigator.pop(context, editedTodo);
               },
               child: const Text('OK'),
@@ -133,7 +138,9 @@ class _TodoPageState extends State<TodoPage> {
                               onPressed: () async {
                                 final Todo? editedTodo = await _showEditDialog(
                                     context,
-                                    todo: snapshot.data![index]);
+                                    todo: snapshot.data![index],
+                                    token: userToken,
+                                    todosService: todosService);
                                 setState(() {
                                   snapshot.data![index] = editedTodo!;
                                 });
