@@ -20,8 +20,6 @@ class _TodoPageState extends State<TodoPage> {
   String userToken = "";
   final TodosService todosService = TodosService();
 
-  get value => null;
-
   @override
   void initState() {
     super.initState();
@@ -40,43 +38,68 @@ class _TodoPageState extends State<TodoPage> {
     String todoId = todo.id;
 
     return showDialog<Todo?>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Edit todo'),
-          content: TextField(
-            onChanged: (value) {
-              content = value;
-              // print(content);
-            },
-            decoration: InputDecoration(hintText: content),
-          ),
-          actions: <Widget>[
-            Row(
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel'),
+        context: context,
+        barrierDismissible: false, // user must tap button!
+        builder: (BuildContext context) {
+          return StatefulBuilder(builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Edit todo'),
+              content: TextFormField(
+                onChanged: (value) {
+                  content = value;
+                  // print(content);
+                },
+                initialValue: content,
+              ),
+              actions: <Widget>[
+                Row(
+                  children: [
+                    Checkbox(
+                      value: isImportant,
+                      onChanged: (value) {
+                        setState(() {
+                          isImportant = !isImportant;
+                        });
+                      },
+                    ),
+                    const Text('Important'),
+                    Checkbox(
+                      value: isDone,
+                      onChanged: (value) {
+                        setState(() {
+                          isDone = !isDone;
+                        });
+                      },
+                    ),
+                    const Text('Done'),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment
+                      .center, //Center Column contents vertically,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Todo editedTodo = Todo(
+                            content: content,
+                            important: isImportant,
+                            done: isDone,
+                            id: todoId);
+                        todosService.editTodo(editedTodo, token);
+                        Navigator.pop(context, editedTodo);
+                      },
+                      child: const Text('OK'),
+                    ),
+                  ],
                 ),
               ],
-            ),
-            TextButton(
-              onPressed: () {
-                Todo editedTodo = Todo(
-                    content: content,
-                    important: isImportant,
-                    done: isDone,
-                    id: todoId);
-                todosService.editTodo(editedTodo, token);
-                Navigator.pop(context, editedTodo);
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
+            );
+          });
+        });
   }
 
   @override
@@ -141,9 +164,11 @@ class _TodoPageState extends State<TodoPage> {
                                     todo: snapshot.data![index],
                                     token: userToken,
                                     todosService: todosService);
-                                setState(() {
-                                  snapshot.data![index] = editedTodo!;
-                                });
+                                if (editedTodo != null) {
+                                  setState(() {
+                                    snapshot.data![index] = editedTodo;
+                                  });
+                                }
                               },
                               child: const Text('Edit')),
                           OutlinedButton(
