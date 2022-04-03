@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:todo_flutterapp/todos_service.dart';
+import 'add_dialog.dart';
+import 'edit_dialog.dart';
 import 'user_model.dart';
 import 'todos_service.dart';
 import 'todos_model.dart';
@@ -28,80 +30,6 @@ class _TodoPageState extends State<TodoPage> {
     userToken = widget.user.token;
   }
 
-  Future<Todo?> _showEditDialog(BuildContext context,
-      {required Todo todo,
-      required String token,
-      required TodosService todosService}) async {
-    String content = todo.content;
-    bool isImportant = todo.important;
-    bool isDone = todo.done;
-    String todoId = todo.id;
-
-    return showDialog<Todo?>(
-        context: context,
-        barrierDismissible: false, // user must tap button!
-        builder: (BuildContext context) {
-          return StatefulBuilder(builder: (context, setState) {
-            return AlertDialog(
-              title: const Text('Edit todo'),
-              content: TextFormField(
-                onChanged: (value) {
-                  content = value;
-                  // print(content);
-                },
-                initialValue: content,
-              ),
-              actions: <Widget>[
-                Row(
-                  children: [
-                    Checkbox(
-                      value: isImportant,
-                      onChanged: (value) {
-                        setState(() {
-                          isImportant = !isImportant;
-                        });
-                      },
-                    ),
-                    const Text('Important'),
-                    Checkbox(
-                      value: isDone,
-                      onChanged: (value) {
-                        setState(() {
-                          isDone = !isDone;
-                        });
-                      },
-                    ),
-                    const Text('Done'),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment
-                      .center, //Center Column contents vertically,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Todo editedTodo = Todo(
-                            content: content,
-                            important: isImportant,
-                            done: isDone,
-                            id: todoId);
-                        todosService.editTodo(editedTodo, token);
-                        Navigator.pop(context, editedTodo);
-                      },
-                      child: const Text('OK'),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          });
-        });
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -110,6 +38,7 @@ class _TodoPageState extends State<TodoPage> {
         primaryColor: Colors.lightBlueAccent,
       ),
       home: Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
           title: Text('Welcome, $userName!'),
           actions: <Widget>[
@@ -135,64 +64,106 @@ class _TodoPageState extends State<TodoPage> {
             if (snapshot.hasData) {
               return ListView.builder(
                 itemCount: snapshot.data!.length,
-                itemBuilder: (_, index) => Container(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  padding: const EdgeInsets.all(20.0),
-                  decoration: BoxDecoration(
-                    color: const Color(0xff97FFFF),
-                    borderRadius: BorderRadius.circular(15.0),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        snapshot.data![index].content,
-                        style: const TextStyle(
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      ButtonBar(
-                        children: [
-                          OutlinedButton(
-                              onPressed: () async {
-                                final Todo? editedTodo = await _showEditDialog(
-                                    context,
-                                    todo: snapshot.data![index],
-                                    token: userToken,
-                                    todosService: todosService);
-                                if (editedTodo != null) {
-                                  setState(() {
-                                    snapshot.data![index] = editedTodo;
-                                  });
-                                }
-                              },
-                              child: const Text('Edit')),
-                          OutlinedButton(
-                              onPressed: () => print('importance'),
-                              child: Text(snapshot.data![index].important
-                                  ? 'Important'
-                                  : 'Normal')),
-                          OutlinedButton(
-                              onPressed: () => print('done'),
-                              child: Text(snapshot.data![index].done
-                                  ? 'Done'
-                                  : 'Todo')),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
+                itemBuilder: (BuildContext context, index) {
+                  return GestureDetector(
+                      onTap: () {
+                        print('tap');
+                        setDone(snapshot.data![index]);
+                      },
+                      onDoubleTap: () async {
+                        await showDialog(
+                            barrierDismissible: false,
+                            context: context,
+                            builder: (BuildContext context) => EditTodo(
+                                  todo: snapshot.data![index],
+                                  user: widget.user,
+                                ));
+                        setState(() {
+                          allTodos = todosService.fetchTodos(widget.user.token);
+                        });
+                      },
+                      child: Dismissible(
+                          background: Container(
+                            child: const Icon(Icons.delete_forever),
+                            decoration: const BoxDecoration(color: Colors.red),
+                          ),
+                          key: UniqueKey(),
+                          onDismissed: (DismissDirection direction) async {
+                            await todosService.deleteTodo(
+                                snapshot.data![index], userToken);
+                            setState(() {
+                              allTodos =
+                                  todosService.fetchTodos(widget.user.token);
+                            });
+                          },
+                          child: Card(
+                            margin: const EdgeInsets.symmetric(vertical: 5),
+                            child: ListTile(
+                                leading: snapshot.data![index].done
+                                    ? const Icon(
+                                        Icons.check_box,
+                                        color: Colors.green,
+                                      )
+                                    : const Icon(Icons.check_box_outline_blank),
+                                title: snapshot.data![index].done
+                                    ? Text(
+                                        snapshot.data![index].content,
+                                        style: const TextStyle(
+                                            fontSize: 18.0,
+                                            fontWeight: FontWeight.bold,
+                                            decoration:
+                                                TextDecoration.lineThrough),
+                                      )
+                                    : Text(
+                                        snapshot.data![index].content,
+                                        style: const TextStyle(
+                                          fontSize: 18.0,
+                                          fontWeight: FontWeight.normal,
+                                        ),
+                                      ),
+                                dense: true,
+                                trailing: snapshot.data![index].important
+                                    ? const Icon(
+                                        Icons.priority_high,
+                                        color: Colors.red,
+                                      )
+                                    : null),
+                          )));
+                },
               );
             } else {
               return const Center(child: CircularProgressIndicator());
             }
           },
         ),
+        floatingActionButton: FloatingActionButton(
+            child: const Icon(Icons.add),
+            onPressed: () async {
+              await showDialog(
+                  barrierDismissible: false,
+                  context: context,
+                  builder: (BuildContext context) => AddTodo(
+                        user: widget.user,
+                      ));
+              setState(() {
+                allTodos = todosService.fetchTodos(widget.user.token);
+              });
+            }),
       ),
     );
+  }
+
+  setDone(Todo todo) async {
+    Todo editedTodo = Todo(
+      content: todo.content,
+      important: todo.important,
+      done: todo.done ? false : true,
+      id: todo.id,
+    );
+
+    await todosService.editTodo(editedTodo, userToken);
+    setState(() {
+      allTodos = todosService.fetchTodos(widget.user.token);
+    });
   }
 }

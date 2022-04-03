@@ -43,4 +43,34 @@ class TodosService {
       throw Exception('Failed to update todos.');
     }
   }
+
+  Future<void> addTodo(Todo newTodo, String token) async {
+    final response = await http.post(
+      Uri.parse('https://rocky-harbor-47876.herokuapp.com/api/todos'),
+      headers: {
+        HttpHeaders.contentTypeHeader: "application/json",
+        HttpHeaders.authorizationHeader: 'bearer $token',
+      },
+      body: jsonEncode(Todo.toJson(newTodo)),
+    );
+
+    if (response.statusCode != 201) {
+      throw Exception('Failed to add a new todo.');
+    }
+  }
+
+  Future<void> deleteTodo(Todo todo, String token) async {
+    final response = await http.delete(
+      Uri.parse(
+          'https://rocky-harbor-47876.herokuapp.com/api/todos/${todo.id}'),
+      headers: {
+        HttpHeaders.contentTypeHeader: "application/json",
+        HttpHeaders.authorizationHeader: 'bearer $token',
+      },
+    );
+
+    if (response.statusCode != 204) {
+      throw Exception('Failed to delete the todo.');
+    }
+  }
 }
