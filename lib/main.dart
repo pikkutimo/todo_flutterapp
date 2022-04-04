@@ -1,8 +1,8 @@
-import 'dart:convert';
-import 'user_model.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:todo_flutterapp/signup_dialog.dart';
 import 'todo_page.dart';
+import 'user_service.dart';
+import 'helper_dialog.dart';
 
 const serverIp = 'https://rocky-harbor-47876.herokuapp.com/api';
 
@@ -12,30 +12,16 @@ void main() {
 
 class LoginPage extends StatelessWidget {
   LoginPage({Key? key}) : super(key: key);
+
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final UserService _userService = UserService();
 
-  void displayDialog(context, title, text) => showDialog(
-        context: context,
-        builder: (context) =>
-            AlertDialog(title: Text(title), content: Text(text)),
-      );
-
-  Future<User> attemptLogIn(String username, String password) async {
-    final response = await http.post(Uri.parse('$serverIp/login'),
-        body: {"username": username, "password": password});
-    if (response.statusCode == 200) {
-      return User.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to login');
-    }
-  }
-
-  Future<int> attemptSignUp(String username, String password) async {
-    var res = await http.post(Uri.parse('$serverIp/users'),
-        body: {"username": username, "password": password});
-    return res.statusCode;
-  }
+  // void displayDialog(context, title, text) => showDialog(
+  //       context: context,
+  //       builder: (context) =>
+  //           AlertDialog(title: Text(title), content: Text(text)),
+  //     );
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +48,8 @@ class LoginPage extends StatelessWidget {
                     var password = _passwordController.text;
 
                     try {
-                      var user = await attemptLogIn(username, password);
+                      var user =
+                          await _userService.attemptLogIn(username, password);
                       // storage.write(key: "username", value: user.username);
                       Navigator.push(
                         context,
@@ -76,26 +63,11 @@ class LoginPage extends StatelessWidget {
                   },
                   child: const Text("Log In")),
               TextButton(
-                  onPressed: () async {
-                    var username = _usernameController.text;
-                    var password = _passwordController.text;
-
-                    if (username.length < 4) {
-                      displayDialog(context, "Invalid Username",
-                          "The username should be at least 4 characters long");
-                    } else if (password.length < 4) {
-                      displayDialog(context, "Invalid Password",
-                          "The password should be at least 4 characters long");
-                    } else {
-                      var res = await attemptSignUp(username, password);
-                      if (res == 201) {
-                        displayDialog(context, "Success",
-                            "The user was created. Log in now.");
-                      } else {
-                        displayDialog(
-                            context, "Error", "An unknown error occurred.");
-                      }
-                    }
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) =>
+                            const SignupDialog());
                   },
                   child: const Text("Sign Up"))
             ],

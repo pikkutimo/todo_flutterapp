@@ -4,7 +4,7 @@ import 'user_model.dart';
 import 'todos_model.dart';
 
 class EditTodo extends StatefulWidget {
-  EditTodo({Key? key, required this.todo, required this.user})
+  const EditTodo({Key? key, required this.todo, required this.user})
       : super(key: key);
 
   final User user;
