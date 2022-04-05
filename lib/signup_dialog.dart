@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:todo_flutterapp/dismiss_keyboard.dart';
 import 'package:todo_flutterapp/user_service.dart';
 import 'constants.dart';
+import 'my_snackbar.dart';
 
 class SignupDialog extends StatefulWidget {
   const SignupDialog({Key? key}) : super(key: key);
@@ -26,7 +27,7 @@ class _SignupDialogState extends State<SignupDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return StatefulBuilder(builder: (dialogContext, setState) {
+    return StatefulBuilder(builder: (context, setState) {
       return Dialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(Constants.padding),
@@ -38,7 +39,7 @@ class _SignupDialogState extends State<SignupDialog> {
     });
   }
 
-  contentBox(BuildContext dialogContext) {
+  contentBox(BuildContext context) {
     return Stack(children: <Widget>[
       DismissKeyboard(
           child: Container(
@@ -154,7 +155,7 @@ class _SignupDialogState extends State<SignupDialog> {
                               FocusManager.instance.primaryFocus?.unfocus();
                               Navigator.pop(context);
                             },
-                            child: const Text('cancel')),
+                            child: const Text('Cancel')),
                         ElevatedButton(
                             onPressed: () async {
                               FocusManager.instance.primaryFocus?.unfocus();
@@ -162,36 +163,25 @@ class _SignupDialogState extends State<SignupDialog> {
                                   await _userService.attemptSignUp(
                                       userName, name, password, email);
                               if (responseCode == 201) {
-                                ScaffoldMessenger.of(dialogContext)
-                                    .showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Registration succesfull!'),
-                                    duration: Duration(seconds: 5),
-                                  ),
+                                const String message =
+                                    'Registration succesfull!';
+                                showSnackBar(
+                                  message,
+                                  context,
                                 );
                                 Navigator.pop(context);
                               } else if (responseCode == 400) {
-                                ScaffoldMessenger.of(dialogContext)
-                                    .showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                        'Registration failed - username taken!'),
-                                    duration: Duration(seconds: 5),
-                                  ),
-                                );
+                                const String message =
+                                    'Registration failed - username taken!';
+                                showSnackBar(message, context, isError: true);
                                 Navigator.pop(context);
                               } else {
-                                ScaffoldMessenger.of(dialogContext)
-                                    .showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Registration failed!'),
-                                    duration: Duration(seconds: 5),
-                                  ),
-                                );
+                                const String message = 'Something went wrong!';
+                                showSnackBar(message, context, isError: true);
                                 Navigator.pop(context);
                               }
                             },
-                            child: const Text('register')),
+                            child: const Text('Register')),
                       ],
                     ),
                   ],

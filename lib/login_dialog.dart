@@ -1,39 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:todo_flutterapp/todos_service.dart';
-import 'user_model.dart';
-import 'todos_model.dart';
+import 'user_service.dart';
 import 'constants.dart';
 import 'dismiss_keyboard.dart';
+import 'todo_page.dart';
+import 'my_snackbar.dart';
 
-class EditTodo extends StatefulWidget {
-  const EditTodo({Key? key, required this.todo, required this.user})
-      : super(key: key);
-
-  final User user;
-  final Todo todo;
+class LoginPage extends StatefulWidget {
+  const LoginPage({
+    Key? key,
+  }) : super(key: key);
 
   @override
-  _EditTodoState createState() => _EditTodoState();
+  _LoginPageState createState() => _LoginPageState();
 }
 
-class _EditTodoState extends State<EditTodo> {
+class _LoginPageState extends State<LoginPage> {
   String userName = "";
-  String token = "";
-  String content = "";
-  String id = "";
-  bool isImportant = true;
-  bool isDone = false;
-  final TodosService _todosService = TodosService();
+  String password = "";
+  final UserService _userService = UserService();
 
   @override
   void initState() {
     super.initState();
-    userName = widget.user.username;
-    token = widget.user.token;
-    content = widget.todo.content;
-    isImportant = widget.todo.important;
-    isDone = widget.todo.done;
-    id = widget.todo.id;
   }
 
   @override
@@ -54,7 +42,7 @@ class _EditTodoState extends State<EditTodo> {
     return Stack(children: <Widget>[
       DismissKeyboard(
           child: Container(
-              height: 270,
+              height: 300,
               padding: const EdgeInsets.all(10.0),
               margin: const EdgeInsets.all(0.5),
               decoration: BoxDecoration(
@@ -74,7 +62,7 @@ class _EditTodoState extends State<EditTodo> {
                     Row(
                       children: const <Widget>[
                         Expanded(
-                          child: Text('EDIT TODO',
+                          child: Text('LOGIN',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                   color: Colors.blue, fontSize: 18.0)),
@@ -83,9 +71,8 @@ class _EditTodoState extends State<EditTodo> {
                     ),
                     const SizedBox(height: 15),
                     TextFormField(
-                      initialValue: content,
                       onChanged: (value) {
-                        content = value;
+                        userName = value;
                       },
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(
@@ -97,31 +84,26 @@ class _EditTodoState extends State<EditTodo> {
                               BorderSide(color: Colors.blue, width: 1.0),
                         ),
                         fillColor: Colors.grey,
-                        labelText: 'Todo',
+                        labelText: 'Username',
                       ),
                     ),
                     const SizedBox(height: 15),
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: isImportant,
-                          onChanged: (value) {
-                            setState(() {
-                              isImportant = !isImportant;
-                            });
-                          },
+                    TextFormField(
+                      onChanged: (value) {
+                        password = value;
+                      },
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: Colors.black, width: 0.5)),
+                        focusColor: Colors.red,
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.blue, width: 1.0),
                         ),
-                        const Text('Important'),
-                        Checkbox(
-                          value: isDone,
-                          onChanged: (value) {
-                            setState(() {
-                              isDone = !isDone;
-                            });
-                          },
-                        ),
-                        const Text('Done'),
-                      ],
+                        fillColor: Colors.grey,
+                        labelText: 'Password',
+                      ),
                     ),
                     const SizedBox(height: 15),
                     Row(
@@ -136,16 +118,15 @@ class _EditTodoState extends State<EditTodo> {
                         ElevatedButton(
                             onPressed: () async {
                               FocusManager.instance.primaryFocus?.unfocus();
-                              Todo editedTodo = Todo(
-                                content: content,
-                                important: isImportant,
-                                done: isDone,
-                                id: id,
+                              var user = await _userService.attemptLogIn(
+                                  userName, password);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => TodoPage(user: user)),
                               );
-                              await _todosService.editTodo(editedTodo, token);
-                              Navigator.pop(context);
                             },
-                            child: const Text('Edit')),
+                            child: const Text('Login')),
                       ],
                     ),
                   ],

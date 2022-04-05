@@ -33,7 +33,7 @@ class _TodoPageState extends State<TodoPage> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Fetch Data Example',
+      title: 'Fetch Data',
       theme: ThemeData(
         primaryColor: Colors.lightBlueAccent,
       ),
@@ -48,7 +48,7 @@ class _TodoPageState extends State<TodoPage> {
                 onTap: () {
                   // When logging off, you return back and all todos will be
                   // loaded again when logging in
-                  Navigator.pop(context);
+                  Navigator.popUntil(context, (route) => route.isFirst);
                 },
                 child: const Icon(
                   Icons.logout,
