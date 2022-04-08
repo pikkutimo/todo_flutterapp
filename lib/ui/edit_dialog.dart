@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:todo_flutterapp/todos_service.dart';
-import 'user_model.dart';
-import 'todos_model.dart';
-import 'constants.dart';
+import '../models/user_model.dart';
+import '../models/todos_model.dart';
+import '../constants.dart';
 import 'dismiss_keyboard.dart';
+import '../methods/edit_todo.dart';
 
 class EditTodo extends StatefulWidget {
   const EditTodo({Key? key, required this.todo, required this.user})
@@ -23,7 +23,6 @@ class _EditTodoState extends State<EditTodo> {
   String id = "";
   bool isImportant = true;
   bool isDone = false;
-  final TodosService _todosService = TodosService();
 
   @override
   void initState() {
@@ -136,13 +135,8 @@ class _EditTodoState extends State<EditTodo> {
                         ElevatedButton(
                             onPressed: () async {
                               FocusManager.instance.primaryFocus?.unfocus();
-                              Todo editedTodo = Todo(
-                                content: content,
-                                important: isImportant,
-                                done: isDone,
-                                id: id,
-                              );
-                              await _todosService.editTodo(editedTodo, token);
+                              await editTodo(
+                                  content, isImportant, isDone, id, token);
                               Navigator.pop(context);
                             },
                             child: const Text('Edit')),

@@ -1,4 +1,4 @@
-import 'package:todo_flutterapp/user_model.dart';
+import 'package:todo_flutterapp/models/user_model.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -13,7 +13,7 @@ class UserService {
     if (response.statusCode == 200) {
       return User.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception('Failed to login');
+      throw Exception('Invalid username or password');
     }
   }
 
@@ -26,7 +26,6 @@ class UserService {
       "email": email
     });
 
-    print(res.statusCode);
     return res.statusCode;
   }
 }

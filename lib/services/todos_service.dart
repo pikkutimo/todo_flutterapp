@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'todos_model.dart';
+import '../models/todos_model.dart';
 
 class TodosService {
   Future<List<Todo>> fetchTodos(String token) async {

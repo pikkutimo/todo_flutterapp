@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:todo_flutterapp/todos_service.dart';
+import 'package:todo_flutterapp/services/todos_service.dart';
 import 'add_dialog.dart';
 import 'edit_dialog.dart';
-import 'user_model.dart';
-import 'todos_service.dart';
-import 'todos_model.dart';
+import '../models/user_model.dart';
+import '../services/todos_service.dart';
+import '../models/todos_model.dart';
+import '../methods/set_todo_done.dart';
+import '../ui/profile_dialog.dart';
 import 'dart:async';
 
 class TodoPage extends StatefulWidget {
@@ -19,6 +21,7 @@ class TodoPage extends StatefulWidget {
 class _TodoPageState extends State<TodoPage> {
   late Future<List<Todo>> allTodos;
   String userName = "";
+  String name = "";
   String userToken = "";
   final TodosService todosService = TodosService();
 
@@ -27,6 +30,7 @@ class _TodoPageState extends State<TodoPage> {
     super.initState();
     allTodos = todosService.fetchTodos(widget.user.token);
     userName = widget.user.username;
+    name = widget.user.name;
     userToken = widget.user.token;
   }
 
@@ -40,8 +44,28 @@ class _TodoPageState extends State<TodoPage> {
       home: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          title: Text('Welcome, $userName!'),
+          title: Text('$userName\'s todos'),
           actions: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(right: 20.0),
+              child: GestureDetector(
+                onTap: () {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return ProfileDialog(
+                            user: User(
+                                name: name,
+                                username: userName,
+                                token: userToken));
+                      });
+                },
+                child: const Icon(
+                  Icons.account_circle,
+                  size: 26.0,
+                ),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.only(right: 20.0),
               child: GestureDetector(
@@ -55,7 +79,7 @@ class _TodoPageState extends State<TodoPage> {
                   size: 26.0,
                 ),
               ),
-            )
+            ),
           ],
         ),
         body: FutureBuilder<List<Todo>>(
@@ -68,7 +92,10 @@ class _TodoPageState extends State<TodoPage> {
                   return GestureDetector(
                       onTap: () {
                         print('tap');
-                        setDone(snapshot.data![index]);
+                        setTodoDone(snapshot.data![index], userToken);
+                        setState(() {
+                          allTodos = todosService.fetchTodos(widget.user.token);
+                        });
                       },
                       onDoubleTap: () async {
                         await showDialog(
@@ -151,19 +178,5 @@ class _TodoPageState extends State<TodoPage> {
             }),
       ),
     );
-  }
-
-  setDone(Todo todo) async {
-    Todo editedTodo = Todo(
-      content: todo.content,
-      important: todo.important,
-      done: todo.done ? false : true,
-      id: todo.id,
-    );
-
-    await todosService.editTodo(editedTodo, userToken);
-    setState(() {
-      allTodos = todosService.fetchTodos(widget.user.token);
-    });
   }
 }

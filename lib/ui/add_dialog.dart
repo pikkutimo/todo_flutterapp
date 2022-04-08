@@ -1,32 +1,37 @@
 import 'package:flutter/material.dart';
-import 'user_service.dart';
-import 'constants.dart';
+import '../models/user_model.dart';
+import '../constants.dart';
 import 'dismiss_keyboard.dart';
-import 'todo_page.dart';
-import 'my_snackbar.dart';
+import '../methods/add_todo.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({
-    Key? key,
-  }) : super(key: key);
+class AddTodo extends StatefulWidget {
+  const AddTodo({Key? key, required this.user}) : super(key: key);
+
+  final User user;
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _AddTodoState createState() => _AddTodoState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _AddTodoState extends State<AddTodo> {
   String userName = "";
-  String password = "";
-  final UserService _userService = UserService();
+  String userToken = "";
+  String content = "";
+  String id = "mock";
+  bool isImportant = true;
+  bool isDone = false;
+  // final TodosService _todosService = TodosService();
 
   @override
   void initState() {
     super.initState();
+    userName = widget.user.username;
+    userToken = widget.user.token;
   }
 
   @override
   Widget build(BuildContext context) {
-    return StatefulBuilder(builder: (context, setState) {
+    return StatefulBuilder(builder: (dialogContext, setState) {
       return Dialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(Constants.padding),
@@ -38,11 +43,11 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  contentBox(BuildContext context) {
+  contentBox(BuildContext dialogContext) {
     return Stack(children: <Widget>[
       DismissKeyboard(
           child: Container(
-              height: 300,
+              height: 260,
               padding: const EdgeInsets.all(10.0),
               margin: const EdgeInsets.all(0.5),
               decoration: BoxDecoration(
@@ -62,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
                     Row(
                       children: const <Widget>[
                         Expanded(
-                          child: Text('LOGIN',
+                          child: Text('NEW TODO',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                   color: Colors.blue, fontSize: 18.0)),
@@ -72,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 15),
                     TextFormField(
                       onChanged: (value) {
-                        userName = value;
+                        content = value;
                       },
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(
@@ -84,28 +89,24 @@ class _LoginPageState extends State<LoginPage> {
                               BorderSide(color: Colors.blue, width: 1.0),
                         ),
                         fillColor: Colors.grey,
-                        labelText: 'Username',
+                        hintText: ('What do you want to do?'),
+                        labelText: 'Todo',
                       ),
                     ),
                     const SizedBox(height: 15),
-                    TextFormField(
-                      onChanged: (value) {
-                        password = value;
-                      },
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: Colors.black, width: 0.5)),
-                        focusColor: Colors.red,
-                        focusedBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: Colors.blue, width: 1.0),
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: isImportant,
+                          onChanged: (value) {
+                            setState(() {
+                              isImportant = !isImportant;
+                            });
+                          },
                         ),
-                        fillColor: Colors.grey,
-                        labelText: 'Password',
-                      ),
+                        const Text('Important'),
+                      ],
                     ),
-                    const SizedBox(height: 15),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -118,15 +119,11 @@ class _LoginPageState extends State<LoginPage> {
                         ElevatedButton(
                             onPressed: () async {
                               FocusManager.instance.primaryFocus?.unfocus();
-                              var user = await _userService.attemptLogIn(
-                                  userName, password);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => TodoPage(user: user)),
-                              );
+                              await addTodo(dialogContext, content, isImportant,
+                                  isDone, id, userToken);
+                              Navigator.pop(context);
                             },
-                            child: const Text('Login')),
+                            child: const Text('Add')),
                       ],
                     ),
                   ],
