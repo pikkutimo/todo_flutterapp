@@ -177,7 +177,7 @@ class _SignupDialogState extends State<SignupDialog> {
                                 passwordAgain = value;
                               },
                               validator: (value) {
-                                return Validator.doPasswordsMatch(
+                                return _validator.doPasswordsMatch(
                                     password, passwordAgain);
                               },
                               decoration: const InputDecoration(
