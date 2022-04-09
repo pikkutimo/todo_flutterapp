@@ -4,8 +4,8 @@ import 'dart:convert';
 import '../models/todos_model.dart';
 
 class TodosService {
-  Future<List<Todo>> fetchTodos(String token) async {
-    final response = await http.get(
+  Future<List<Todo>> fetchTodos(String token, http.Client client) async {
+    final response = await client.get(
       Uri.parse('https://rocky-harbor-47876.herokuapp.com/api/todos'),
       headers: {
         HttpHeaders.authorizationHeader: 'bearer $token',
@@ -21,8 +21,9 @@ class TodosService {
     }
   }
 
-  Future<void> editTodo(Todo editedTodo, String token) async {
-    final response = await http.put(
+  Future<void> editTodo(
+      Todo editedTodo, String token, http.Client client) async {
+    final response = await client.put(
       Uri.parse(
           'https://rocky-harbor-47876.herokuapp.com/api/todos/${editedTodo.id}'),
       headers: {
@@ -44,8 +45,8 @@ class TodosService {
     }
   }
 
-  Future<void> addTodo(Todo newTodo, String token) async {
-    final response = await http.post(
+  Future<void> addTodo(Todo newTodo, String token, http.Client client) async {
+    final response = await client.post(
       Uri.parse('https://rocky-harbor-47876.herokuapp.com/api/todos'),
       headers: {
         HttpHeaders.contentTypeHeader: "application/json",
@@ -59,8 +60,8 @@ class TodosService {
     }
   }
 
-  Future<void> deleteTodo(Todo todo, String token) async {
-    final response = await http.delete(
+  Future<void> deleteTodo(Todo todo, String token, http.Client client) async {
+    final response = await client.delete(
       Uri.parse(
           'https://rocky-harbor-47876.herokuapp.com/api/todos/${todo.id}'),
       headers: {

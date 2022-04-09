@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:todo_flutterapp/methods/user_tools.dart';
 import '../constants.dart';
 import 'dismiss_keyboard.dart';
-import '../methods/user_login.dart';
+import '../methods/user_tools.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({
@@ -36,6 +37,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   contentBox(BuildContext context) {
+    UserTools _userTools = UserTools();
+
     return Stack(children: <Widget>[
       DismissKeyboard(
           child: Container(
@@ -115,7 +118,8 @@ class _LoginPageState extends State<LoginPage> {
                         ElevatedButton(
                             onPressed: () async {
                               FocusManager.instance.primaryFocus?.unfocus();
-                              await userLogin(context, userName, password);
+                              await _userTools.userLogin(
+                                  context, userName, password);
                             },
                             child: const Text('Login')),
                       ],

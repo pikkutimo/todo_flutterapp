@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:todo_flutterapp/ui/dismiss_keyboard.dart';
 import '../constants.dart';
 import '../methods/validator.dart';
-// import '../methods/email_validator.dart';
-// import '../methods/is_name_empty.dart';
-// import '../methods/is_password.dart';
-// import '../methods/do_passwords_match.dart';
-import '../methods/new_user_signup.dart';
+import '../methods/user_tools.dart';
 
 class SignupDialog extends StatefulWidget {
   const SignupDialog({Key? key}) : super(key: key);
@@ -46,6 +42,7 @@ class _SignupDialogState extends State<SignupDialog> {
   }
 
   contentBox(BuildContext context) {
+    UserTools _userTools = UserTools();
     Validator _validator = Validator();
     return Stack(children: <Widget>[
       DismissKeyboard(
@@ -209,8 +206,8 @@ class _SignupDialogState extends State<SignupDialog> {
                         ElevatedButton(
                             onPressed: () async {
                               FocusManager.instance.primaryFocus?.unfocus();
-                              await newUserSignup(context, _formKey, userName,
-                                  name, password, email);
+                              await _userTools.newUserSignup(context, _formKey,
+                                  userName, name, password, email);
                             },
                             child: const Text('Register')),
                       ],

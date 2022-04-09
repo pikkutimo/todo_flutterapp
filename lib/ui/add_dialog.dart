@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 import '../constants.dart';
 import 'dismiss_keyboard.dart';
-import '../methods/add_todo.dart';
+import 'add_todo.dart';
+import 'package:http/http.dart' as http;
 
 class AddTodo extends StatefulWidget {
   const AddTodo({Key? key, required this.user}) : super(key: key);
@@ -20,7 +21,7 @@ class _AddTodoState extends State<AddTodo> {
   String id = "mock";
   bool isImportant = true;
   bool isDone = false;
-  // final TodosService _todosService = TodosService();
+  http.Client client = http.Client();
 
   @override
   void initState() {
@@ -120,7 +121,7 @@ class _AddTodoState extends State<AddTodo> {
                             onPressed: () async {
                               FocusManager.instance.primaryFocus?.unfocus();
                               await addTodo(dialogContext, content, isImportant,
-                                  isDone, id, userToken);
+                                  isDone, id, userToken, client);
                               Navigator.pop(context);
                             },
                             child: const Text('Add')),

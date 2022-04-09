@@ -3,7 +3,8 @@ import '../models/user_model.dart';
 import '../models/todos_model.dart';
 import '../constants.dart';
 import 'dismiss_keyboard.dart';
-import '../methods/edit_todo.dart';
+import '../methods/todo_tools.dart';
+import 'package:http/http.dart' as http;
 
 class EditTodo extends StatefulWidget {
   const EditTodo({Key? key, required this.todo, required this.user})
@@ -23,6 +24,7 @@ class _EditTodoState extends State<EditTodo> {
   String id = "";
   bool isImportant = true;
   bool isDone = false;
+  final http.Client client = http.Client();
 
   @override
   void initState() {
@@ -50,6 +52,7 @@ class _EditTodoState extends State<EditTodo> {
   }
 
   contentBox(BuildContext context) {
+    TodoTools _todoTools = TodoTools();
     return Stack(children: <Widget>[
       DismissKeyboard(
           child: Container(
@@ -135,8 +138,8 @@ class _EditTodoState extends State<EditTodo> {
                         ElevatedButton(
                             onPressed: () async {
                               FocusManager.instance.primaryFocus?.unfocus();
-                              await editTodo(
-                                  content, isImportant, isDone, id, token);
+                              await _todoTools.editTodo(content, isImportant,
+                                  isDone, id, token, client);
                               Navigator.pop(context);
                             },
                             child: const Text('Edit')),

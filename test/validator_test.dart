@@ -6,7 +6,7 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:flutter_test/flutter_test.dart' show expect, group, test;
-import '../lib/methods/validator.dart';
+import 'package:todo_flutterapp/methods/validator.dart';
 
 void main() {
   group("Validator", () {
@@ -71,7 +71,7 @@ void main() {
       expect(emptyResult, "The passwords don't match.");
     });
 
-    test("7# The validator validates identical passwords", () {
+    test("8# The validator validates identical passwords", () {
       final _validator = Validator();
 
       final emptyResult = _validator.doPasswordsMatch("test", "test");

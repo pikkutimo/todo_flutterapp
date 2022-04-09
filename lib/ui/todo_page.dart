@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:todo_flutterapp/methods/todo_tools.dart';
 import 'package:todo_flutterapp/services/todos_service.dart';
 import 'add_dialog.dart';
 import 'edit_dialog.dart';
 import '../models/user_model.dart';
 import '../services/todos_service.dart';
 import '../models/todos_model.dart';
-import '../methods/set_todo_done.dart';
+import 'package:http/http.dart' as http;
 import '../ui/profile_dialog.dart';
 import 'dart:async';
 
@@ -24,11 +25,12 @@ class _TodoPageState extends State<TodoPage> {
   String name = "";
   String userToken = "";
   final TodosService todosService = TodosService();
+  var client = http.Client();
 
   @override
   void initState() {
     super.initState();
-    allTodos = todosService.fetchTodos(widget.user.token);
+    allTodos = todosService.fetchTodos(widget.user.token, client);
     userName = widget.user.username;
     name = widget.user.name;
     userToken = widget.user.token;
@@ -36,6 +38,7 @@ class _TodoPageState extends State<TodoPage> {
 
   @override
   Widget build(BuildContext context) {
+    TodoTools _todoTools = TodoTools();
     return MaterialApp(
       title: 'Fetch Data',
       theme: ThemeData(
@@ -92,9 +95,11 @@ class _TodoPageState extends State<TodoPage> {
                   return GestureDetector(
                       onTap: () {
                         print('tap');
-                        setTodoDone(snapshot.data![index], userToken);
+                        _todoTools.setTodoDone(
+                            snapshot.data![index], userToken, client);
                         setState(() {
-                          allTodos = todosService.fetchTodos(widget.user.token);
+                          allTodos = todosService.fetchTodos(
+                              widget.user.token, client);
                         });
                       },
                       onDoubleTap: () async {
@@ -106,7 +111,8 @@ class _TodoPageState extends State<TodoPage> {
                                   user: widget.user,
                                 ));
                         setState(() {
-                          allTodos = todosService.fetchTodos(widget.user.token);
+                          allTodos = todosService.fetchTodos(
+                              widget.user.token, client);
                         });
                       },
                       child: Dismissible(
@@ -117,10 +123,10 @@ class _TodoPageState extends State<TodoPage> {
                           key: UniqueKey(),
                           onDismissed: (DismissDirection direction) async {
                             await todosService.deleteTodo(
-                                snapshot.data![index], userToken);
+                                snapshot.data![index], userToken, client);
                             setState(() {
-                              allTodos =
-                                  todosService.fetchTodos(widget.user.token);
+                              allTodos = todosService.fetchTodos(
+                                  widget.user.token, client);
                             });
                           },
                           child: Card(
@@ -173,7 +179,7 @@ class _TodoPageState extends State<TodoPage> {
                         user: widget.user,
                       ));
               setState(() {
-                allTodos = todosService.fetchTodos(widget.user.token);
+                allTodos = todosService.fetchTodos(widget.user.token, client);
               });
             }),
       ),
