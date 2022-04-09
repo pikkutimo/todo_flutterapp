@@ -1,5 +1,4 @@
 name: Pikkutimos Todo Android Release
-//
 
 on:
   push:
