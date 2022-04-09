@@ -3,37 +3,28 @@ name: Pikkutimos Todo Android Release
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - '**/README.md'
+
+    workflow_dispatch:
 
 jobs:
+  # This workflow contains a single job called "build"
   build:
-    name: Build APK and Create release
-    needs: [ version ]
+    name: flutter build
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
+    env:
+      JAVA_VERSION: "11.0"
+      FLUTTER_VERSION: "2.5.3"
     steps:
-    - uses: actions/checkout@v1
-    - uses: actions/setup-java@v1
-      with:
-        java-version: '12.x'
-    - uses: subosito/flutter-action@v1
-      with:
-        flutter-version: '1.17.0'
-    - name: Get version.txt
-      uses: actions/download-artifact@v2
-      with:
-        name: gitversion
-    - name: Read version
-      id: version
-      uses: juliangruber/read-file-action@v1
-      with:
-        path: version.txt
-    - run: flutter pub get
-    - run: flutter test
-    - run: flutter build apk --release --split-per-abi
-    - run: flutter build appbundle
-    - name: Create a Release in GitHub
-      uses: ncipollo/release-action@v1
-      with:
-        artifacts: "build/app/outputs/apk/release/*.apk,build/app/outputs/bundle/release/app-release.aab"
-        token: ${{ secrets.TODO_TOKEN }}
-        tag: ${{ steps.version.outputs.content }}
-        commit: ${{ github.sha }}
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: $
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: $
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
