@@ -13,7 +13,7 @@ import 'todos_service_test.mocks.dart';
 @GenerateMocks([http.Client])
 void main() {
   group('TodosService', () {
-    const token = "MockitoMocking";
+    const token = "MockitoMockin";
     test(
         '#1 fetchTodos - Return a list of Todos if the http call completes succesfully',
         () async {
