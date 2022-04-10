@@ -1,4 +1,4 @@
-name: Pikkutimos Todo Android Release
+name: Build
 
 on:
   push:
